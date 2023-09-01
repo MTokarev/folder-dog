@@ -1,0 +1,16 @@
+2023-08-31 23:02:46.486 -07:00 [INF] Test
+2023-08-31 23:19:35.089 -07:00 [INF] The app has started listening for file creation with extension csv in the folder /Users/mtokarev/Documents/git/folderdog/src/FolderDog and all child directories.
+2023-08-31 23:20:20.062 -07:00 [INF] The app has started listening for file creation with extension csv in the folder /Users/mtokarev/Documents/git/folderdog/src/FolderDog and all child directories.
+2023-08-31 23:40:07.082 -07:00 [INF] The app has started listening for file creation with extensions csv,txt in the folder /Users/mtokarev/Documents/git/folderdog/src/FolderDog and all child directories.
+2023-08-31 23:40:29.381 -07:00 [INF] The app has started listening for file creation with extensions 'csv|txt' in the folder /Users/mtokarev/Documents/git/folderdog/src/FolderDog and all child directories.
+2023-08-31 23:40:35.886 -07:00 [INF] The app has started listening for file creation with extensions 'csv|txt' in the folder /Users/mtokarev/Documents/git/folderdog/src/FolderDog and all child directories.
+2023-08-31 23:43:56.518 -07:00 [INF] The app has started listening for file creation with extensions 'csv|txt' in the folder /Users/mtokarev/Documents/git/folderdog/src/FolderDog and all child directories.
+2023-08-31 23:44:06.211 -07:00 [INF] New file creating was detected: ./obj/Debug/net7.0/test.csv
+2023-08-31 23:44:16.957 -07:00 [INF] Sending message to test@eas.az with the message subject File has been created and attachment ./obj/Debug/net7.0/test.csv...
+2023-08-31 23:44:20.445 -07:00 [WRN] Failure sending mail.
+2023-08-31 23:44:20.445 -07:00 [WRN] Inner error nodename nor servname provided, or not known
+2023-08-31 23:44:36.804 -07:00 [INF] New file creating was detected: ./obj/Debug/net7.0/test.txt
+2023-08-31 23:44:52.036 -07:00 [INF] The app has started listening for file creation with extensions 'csv|txt' in the folder /Users/mtokarev/Documents/git/folderdog/src/FolderDog and all child directories.
+2023-08-31 23:45:23.241 -07:00 [INF] The app has started listening for file creation with extensions 'csv|txt' in the folder /Users/mtokarev/Documents/git/folderdog/src/FolderDog and all child directories.
+2023-08-31 23:45:25.750 -07:00 [INF] New file creating was detected: ./obj/Debug/net7.0/test copy.txt
+2023-08-31 23:59:56.617 -07:00 [INF] The app has started listening for file creation with extensions 'csv|txt' in the folder /Users/mtokarev/Documents/git/folderdog/src/FolderDog and all child directories.

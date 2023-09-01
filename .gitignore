@@ -1,0 +1,6 @@
+*bin*
+*obj*
+*logs*
+.vscode
+.DS_STORE
+.vs

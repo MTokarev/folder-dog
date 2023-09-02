@@ -40,6 +40,8 @@ jobs:
       run: |
         cd ${{ inputs.project-folder }}
         echo "current folder set to: $(pwd)"
+        echo "folder content"
+        ls
     - name: Restore dependencies
       run: dotnet restore
     - name: Build

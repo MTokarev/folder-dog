@@ -46,7 +46,7 @@ internal class Program
                 | NotifyFilters.FileName
                 | NotifyFilters.Size;
 
-            watcher.Created += OnCreated;
+            watcher.Created += OnCreatedAsync;
             watcher.Filter = $"*.{fileExtension}";
             watcher.IncludeSubdirectories = true;
             watcher.EnableRaisingEvents = true;
@@ -66,28 +66,58 @@ internal class Program
     }
 
     /// <summary>
-    /// OnFile creation handler
+    /// OnFile creation async handler
     /// </summary>
+    /// <remarks>
+    /// Overal it is a bad practice to use 'async void' except for event handlers.
+    /// <seealso cref="https://learn.microsoft.com/en-us/archive/msdn-magazine/2013/march/async-await-best-practices-in-asynchronous-programming"/>
+    /// </remarks>
     /// <param name="sender">Event sender</param>
     /// <param name="e">File event</param>
-    private static void OnCreated(object sender, FileSystemEventArgs e)
+    private static async void OnCreatedAsync(object sender, FileSystemEventArgs e)
     {
-        _logger.Information("New file creation has been detected: '{FullPath}'", e.FullPath);
-        if (_fileService.TryGetFileStream(e.FullPath, out FileStream fs))
+        // Run handler in the thread pool
+        // File service has a conflict resolution logic that locks the thread before retry
+        // accessing file.
+        // To avoid blockage in the main thread the operation is ofloaded to the ThreadPool.
+        await Task.Run(async () =>
         {
-            var result = _messageSender.SendMessage($"File was created '{e.Name}'", fs, e.Name);
+            // Since it is fire and forget mode - any unhandled exception will terminate the app.
+            // Here we need to log all exceptions.
+            FileStream fs = null;
+            try
+            {
+                _logger.Information("New file creation has been detected: '{FullPath}'", e.FullPath);
+                if (_fileService.TryGetFileStream(e.FullPath, out fs))
+                {
+                    var result = _messageSender.SendMessage($"File was created '{e.Name}'", fs, e.Name);
 
-            if (result.IsSuccessful)
-            {
-                _logger.Information("File {FileName} has been processed", e.Name);
+                    if (result.IsSuccessful)
+                    {
+                        _logger.Information("File {FileName} has been processed", e.Name);
+                    }
+                    else
+                    {
+                        _logger.Error("Unable to process '{FileName}'. Errors: '{Errors}'",
+                            e.Name,
+                            string.Join(",", result.Errors));
+                    }
+                }
             }
-            else
+            // Catching all exceptions to avoid app termiantion
+            catch (Exception ex)
             {
-                _logger.Error("Unable to process '{FileName}'. Errors: '{Errors}'", 
-                    e.Name, 
-                    string.Join(",", result.Errors));
+                _logger.Error("Exception has been thrown in the event handler. Error message '{Message}'.",
+                    ex.Message);
             }
-        }
+            finally
+            {
+                if (fs is not null)
+                {
+                    await fs.DisposeAsync();
+                }
+            }
+        });
     }
 
     /// <summary>

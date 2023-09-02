@@ -13,7 +13,7 @@ namespace FolderDog.Services
 	{
         private readonly FileServiceOptions _fileOptions;
         private readonly ILogger _logger;
-        private readonly ConcurrentDictionary<string, FileCache> _proccesedFilesCache = new();
+        private readonly ConcurrentDictionary<string, FileCache> _processedFilesCache = new();
 
         public FileService(FileServiceOptions fileOptions, ILogger logger)
 		{
@@ -75,7 +75,7 @@ namespace FolderDog.Services
         private bool HasFileBeenProcessed(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
-            if (_proccesedFilesCache.TryGetValue(filePath, out FileCache fileCache))
+            if (_processedFilesCache.TryGetValue(filePath, out FileCache fileCache))
             {
                 if (fileCache.FileSize == fileInfo.Length)
                 {
@@ -87,7 +87,7 @@ namespace FolderDog.Services
             }
 
             _logger.Debug("Adding '{FileFullName}' to the cache.", fileInfo.FullName);
-            _proccesedFilesCache[filePath] = new FileCache { FileSize = fileInfo.Length, LastProcessed = DateTime.UtcNow };
+            _processedFilesCache[filePath] = new FileCache { FileSize = fileInfo.Length, LastProcessed = DateTime.UtcNow };
 
             return false;
         }

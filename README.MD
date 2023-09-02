@@ -16,12 +16,12 @@ Once you run the app, it will log messages to both the console and to the file l
 
 ## Handle edge cases
 You can control how to handle edge cases such as:
-- A file is still open by another process.
+- A file is still open by another process (Some apps might write content by batches).
 - We had already processed the file before, but now received the same event. You can control what to do in this case.
 
 Also, you can provide one or many file extensions to listen to. For example, only excel or csv files.
 
-## Locking in the app
+## Multi threading in the app
 Each file creation event executes in a dedicated thread from the `ThreadPool`. If all thread pools are busy, then the event will be queued and processed later.
 
 ## Configuration

@@ -69,7 +69,7 @@ internal class Program
     /// OnFile creation async handler
     /// </summary>
     /// <remarks>
-    /// Overal it is a bad practice to use 'async void' except for event handlers.
+    /// Overall it is a bad practice to use 'async void' except for event handlers.
     /// <seealso cref="https://learn.microsoft.com/en-us/archive/msdn-magazine/2013/march/async-await-best-practices-in-asynchronous-programming"/>
     /// </remarks>
     /// <param name="sender">Event sender</param>
@@ -79,7 +79,7 @@ internal class Program
         // Run handler in the thread pool
         // File service has a conflict resolution logic that locks the thread before retry
         // accessing file.
-        // To avoid blockage in the main thread the operation is ofloaded to the ThreadPool.
+        // To avoid blockage in the main thread the operation is offloaded to the ThreadPool.
         await Task.Run(async () =>
         {
             // Since it is fire and forget mode - any unhandled exception will terminate the app.
@@ -105,7 +105,7 @@ internal class Program
                     }
                 }
             }
-            // Catching all exceptions to avoid app termiantion
+            // Catching all exceptions to avoid app crash
             catch (Exception ex)
             {
                 _logger.Error("Exception has been thrown in the event handler. Error message '{Message}'.",

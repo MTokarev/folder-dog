@@ -39,11 +39,12 @@ jobs:
     - name: Set working directory
       run: |
         cd ${{ inputs.project-folder }}
-        echo "current folder set to: $pwd"
+        echo "current folder set to: $(pwd)"
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: |
+        cd ${{ inputs.project-folder }}
         dotnet build --no-restore
         dotnet publish -c Release ${{ inputs.runtime-configuration}}
     - name: Zip Artifact

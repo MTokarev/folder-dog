@@ -31,6 +31,7 @@ Example:
 {
   "Binding": {
     "FolderPath": "./",
+    "ListenInSubfolders": false,
     "FileExtensions": [
       "csv",
       "txt"

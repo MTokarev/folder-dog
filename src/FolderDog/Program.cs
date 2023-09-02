@@ -48,7 +48,7 @@ internal class Program
 
             watcher.Created += OnCreatedAsync;
             watcher.Filter = $"*.{fileExtension}";
-            watcher.IncludeSubdirectories = true;
+            watcher.IncludeSubdirectories = _bindingOptions.ListenInSubfolders;
             watcher.EnableRaisingEvents = true;
         }
 

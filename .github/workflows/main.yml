@@ -2,9 +2,10 @@ name: .NET
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - main
     paths:
-      - src/*
+      - src/**
 
 # TODO: Currently all jobs will create a different releases with the same name
 # For Example:

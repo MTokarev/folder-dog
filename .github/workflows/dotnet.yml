@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       project-folder:
-        required: true
+        required: false
         default: src/FolderDog
         type: string
       release-name:

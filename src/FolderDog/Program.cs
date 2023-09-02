@@ -9,8 +9,10 @@ using Serilog;
 internal class Program
 {
     private const string ConfigFileName = "appsettings.json";
-    private static readonly BindingOptions _fileOptions = new();
+    private static readonly BindingOptions _bindingOptions = new();
     private static readonly EmailOptions _emailOptions = new();
+    private static readonly FileServiceOptions _fileServiceOptions = new();
+    private static IFileService _fileService;
     private static IMessageSender _messageSender;
     private static ILogger _logger;
     private static  IConfiguration _config;
@@ -27,6 +29,7 @@ internal class Program
         InitLogger();
         BindOptions();
         _messageSender = new EmailService(_emailOptions, _logger);
+        _fileService = new FileService(_fileServiceOptions, _logger);
         ConfigureFileListener();
     }
 
@@ -35,9 +38,9 @@ internal class Program
     /// </summary>
     private static void ConfigureFileListener()
     {
-        foreach(string fileExtension in _fileOptions.FileExtensions)
+        foreach(string fileExtension in _bindingOptions.FileExtensions)
         {
-            var watcher = new FileSystemWatcher(_fileOptions.FolderPath);
+            var watcher = new FileSystemWatcher(_bindingOptions.FolderPath);
             watcher.NotifyFilter = NotifyFilters.Attributes
                 | NotifyFilters.DirectoryName
                 | NotifyFilters.FileName
@@ -49,11 +52,10 @@ internal class Program
             watcher.EnableRaisingEvents = true;
         }
 
-        var fullPath = Path.Join(Directory.GetCurrentDirectory(), 
-            _fileOptions.FolderPath == "./" 
-                ? string.Empty
-                : _fileOptions.FolderPath);
-        string fileExtensionsString = string.Join("|", _fileOptions.FileExtensions);
+        var fullPath = string.Equals(_bindingOptions.FolderPath, "./") 
+                ? Directory.GetCurrentDirectory()
+                : _bindingOptions.FolderPath;
+        string fileExtensionsString = string.Join("|", _bindingOptions.FileExtensions);
 
          _logger.Information("The app has started listening for file creation with extensions " + 
             "'{FileExtension}' in the folder '{FullPath}' and all child directories.",
@@ -71,17 +73,20 @@ internal class Program
     private static void OnCreated(object sender, FileSystemEventArgs e)
     {
         _logger.Information("New file creation has been detected: '{FullPath}'", e.FullPath);
-        var result = _messageSender.SendMessage($"File was created '{e.Name}'", e.FullPath);
+        if (_fileService.TryGetFileStream(e.FullPath, out FileStream fs))
+        {
+            var result = _messageSender.SendMessage($"File was created '{e.Name}'", fs, e.Name);
 
-        if (result.IsSuccessful)
-        {
-            _logger.Information("File {FileName} has been processed", e.Name);
-        }
-        else
-        {
-            _logger.Error("Unable to process '{FileName}'. Errors: '{Errors}'", 
-                e.Name, 
-                string.Join(",", result.Errors));
+            if (result.IsSuccessful)
+            {
+                _logger.Information("File {FileName} has been processed", e.Name);
+            }
+            else
+            {
+                _logger.Error("Unable to process '{FileName}'. Errors: '{Errors}'", 
+                    e.Name, 
+                    string.Join(",", result.Errors));
+            }
         }
     }
 
@@ -91,9 +96,11 @@ internal class Program
     private static void BindOptions()
     {
         _config.GetSection("Binding")
-            .Bind(_fileOptions);
+            .Bind(_bindingOptions);
         _config.GetSection("Email")
             .Bind(_emailOptions);
+        _config.GetSection("FileService")
+            .Bind(_fileServiceOptions);
     }
 
     /// <summary>

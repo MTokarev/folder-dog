@@ -25,7 +25,7 @@ namespace FolderDog.Services
         /// <summary>
         /// <see cref="IMessageSender.SendMessage(string, string?)"/>
         /// </summary>
-        public Result SendMessage(string message, string? pathToAttachment = null)
+        public Result SendMessage(string message, FileStream fileStream = null, string fileName = null)
         {
             var result = new Result();
             using var mailMessage = new MailMessage();
@@ -35,7 +35,7 @@ namespace FolderDog.Services
             
             try
             {
-                MessageBuilder(mailMessage, message, pathToAttachment);
+                MessageBuilder(mailMessage, message, fileStream, fileName);
             }
             catch (IOException ex)
             {
@@ -50,7 +50,7 @@ namespace FolderDog.Services
                 _logger.Information("Sending message to '{Recipients}' with the message subject '{Subject}' and attachment '{Attachment}'...",
                     sendTos, 
                     _emailOptions.MessageSubject,
-                    pathToAttachment ?? string.Empty);
+                    fileName ?? string.Empty);
 
                 smtpClient.Send(mailMessage);
                 _logger.Information("Message has been sent.");
@@ -77,7 +77,11 @@ namespace FolderDog.Services
         /// <param name="message">Message body</param>
         /// <param name="pathToAttachment"></param>
         /// <returns><see cref="MailMessage"/>attachment</returns>
-        private MailMessage MessageBuilder(MailMessage mailMessage, string message, string? pathToAttachment = null)
+        private MailMessage MessageBuilder(
+            MailMessage mailMessage,
+            string message,
+            FileStream fileStream = null,
+            string fileName = null)
         {
             mailMessage.From = new MailAddress(_emailOptions.SendFrom);
             
@@ -96,15 +100,9 @@ namespace FolderDog.Services
                 mailMessage.CC.Add(new MailAddress(sendCc));
             }
 
-            if (!string.IsNullOrEmpty(pathToAttachment))
+            if (fileStream is not null)
             {
-                var filename = Path.GetFileName(pathToAttachment);
-                var attachmentStream = new FileStream(
-                    pathToAttachment,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.ReadWrite);
-                mailMessage.Attachments.Add(new Attachment(attachmentStream, filename));
+                mailMessage.Attachments.Add(new Attachment(fileStream, fileStream.Name));
             }
             mailMessage.Body = message;
             mailMessage.Subject = _emailOptions.MessageSubject;

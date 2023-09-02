@@ -13,6 +13,6 @@ namespace FolderDog.Interfaces
         /// <param name="message">Message body</param>
         /// <param name="pathToAttachment">Optional path to the atachment file</param>
         /// <returns><see cref="Result"/></returns>
-        Result SendMessage(string message, string? pathToAttachment = null);
+        Result SendMessage(string message, FileStream fileStream = null, string fileName = null);
     }
 }

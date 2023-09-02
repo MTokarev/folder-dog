@@ -3,6 +3,10 @@ name: .NET Build and Publish
 on:
   workflow_call:
     inputs:
+      project-folder:
+        required: true
+        default: src/FolderDog
+        type: string
       release-name:
         required: true
         type: string
@@ -32,6 +36,10 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 7.0.x
+    - name: Set working directory
+      run: |
+        cd ${{ inputs.project-folder }}
+        echo "current folder set to: $pwd"
     - name: Restore dependencies
       run: dotnet restore
     - name: Build

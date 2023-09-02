@@ -30,23 +30,19 @@ env:
 jobs:
   build-framework-dependent:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.project-folder }}
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 7.0.x
-    - name: Set working directory
-      run: |
-        cd ${{ inputs.project-folder }}
-        echo "current folder set to: $(pwd)"
-        echo "folder content"
-        ls
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: |
-        cd ${{ inputs.project-folder }}
         dotnet build --no-restore
         dotnet publish -c Release ${{ inputs.runtime-configuration}}
     - name: Zip Artifact

@@ -6,6 +6,9 @@ using Serilog;
 
 namespace FolderDog.Services
 {
+    /// <summary>
+    /// <see cref="IFileService"/>
+    /// </summary>
 	public class FileService : IFileService
 	{
         private readonly FileServiceOptions _fileOptions;
@@ -18,25 +21,28 @@ namespace FolderDog.Services
             _logger = logger;
         }
 
+        /// <summary>
+        /// <see cref="IFileService.TryGetFileStream(string, out FileStream)"/>
+        /// </summary>
         public bool TryGetFileStream(string filePath, out FileStream fileStream)
         {
             fileStream = null;
-            long fileSize = new FileInfo(filePath).Length;
-
-            // Return if the file was processed before
-            if (_proccesedFilesCache.TryGetValue(filePath, out FileCache fileCache))
+            if (_fileOptions.SkipProcessedFiles)
             {
-                if (fileCache.FileSize == fileSize)
+                _logger.Debug("Option '{OptionName}' is enabled. Checking if file '{FilePath}' was processed before.",
+                    nameof(_fileOptions.SkipProcessedFiles),
+                    filePath);
+                if(HasFileBeenProcessed(filePath))
                 {
-                    _logger.Information("The file was already processed on '{DateTime}' UTC.", fileCache.LastProcessed);
                     return false;
                 }
             }
 
-            _proccesedFilesCache[filePath] = new FileCache { FileSize = fileSize, LastProcessed = DateTime.UtcNow };
-
+            // Trying access the file multiple time. To give opportunity to the external app to flush the data to the disk
             for (int i = 1; i <= _fileOptions.RepeatAccessAttempts; i++)
             {
+                _logger.Information("Trying to access file '{FilePath}'. Attempt '{CurrentAttempt}' out of '{TotalAttempts}'...",
+                    filePath, i, _fileOptions.RepeatAccessAttempts);
                 try
                 {
                     var fs = new FileStream(
@@ -49,14 +55,40 @@ namespace FolderDog.Services
                 }
                 catch (IOException)
                 {
-                    _logger.Information("Unable to access file '{FilePath}'. Attempt '{CurrentAttempt}' out of '{TotalAttempts}'",
-                        filePath, i, _fileOptions.RepeatAccessAttempts);
+                    _logger.Information("Unable to access file '{FilePath}'.",
+                        filePath);
                 }
 
                 Thread.Sleep(_fileOptions.WaitUntilNextRetryInMilliseconds);
             }
 
             _logger.Warning("File '{FilePath}' is used by another process and cannot be accessed.", filePath);
+            return false;
+        }
+
+        /// <summary>
+        /// Check if file has been processed.
+        /// This function will use the file name and the size.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns>True if file (compared by file name and size) has been already processed. Otherwise False.</returns>
+        private bool HasFileBeenProcessed(string filePath)
+        {
+            var fileInfo = new FileInfo(filePath);
+            if (_proccesedFilesCache.TryGetValue(filePath, out FileCache fileCache))
+            {
+                if (fileCache.FileSize == fileInfo.Length)
+                {
+                    _logger.Information("The file '{FileFullName}' was already processed on '{DateTime}' UTC.",
+                        fileInfo.FullName,
+                        fileCache.LastProcessed);
+                    return true;
+                }
+            }
+
+            _logger.Debug("Adding '{FileFullName}' to the cache.", fileInfo.FullName);
+            _proccesedFilesCache[filePath] = new FileCache { FileSize = fileInfo.Length, LastProcessed = DateTime.UtcNow };
+
             return false;
         }
     }

@@ -59,7 +59,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.ARTIFACT_NAME }}
-        path: ${{ env.ARTIFACT_FILE_NAME }}
+        path: ${{ inputs.project-folder }}/${{ env.ARTIFACT_FILE_NAME }}
 
   release:
     needs: build-framework-dependent
@@ -84,5 +84,5 @@ jobs:
       with:
         upload_url: ${{ steps.new-release.outputs.upload_url }}
         asset_path: ${{ env.ARTIFACT_FILE_NAME }}
-        asset_name: webhookshell-${{ inputs.runtime-name }}-${{ inputs.version-tag }}.zip
+        asset_name: folder-dog-${{ inputs.runtime-name }}-${{ inputs.version-tag }}.zip
         asset_content_type: application/zip

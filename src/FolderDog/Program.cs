@@ -1,5 +1,4 @@
-﻿using System.IO;
-using FolderDog.Interfaces;
+﻿using FolderDog.Interfaces;
 using FolderDog.Options;
 using FolderDog.Services;
 using Microsoft.Extensions.Configuration;
@@ -31,6 +30,23 @@ internal class Program
         _messageSender = new EmailService(_emailOptions, _logger);
         _fileService = new FileService(_fileServiceOptions, _logger);
         ConfigureFileListener();
+
+
+        var fullPath = string.Equals(_bindingOptions.FolderPath, "./")
+        ? Directory.GetCurrentDirectory()
+        : _bindingOptions.FolderPath;
+        string fileExtensionsString = string.Join("|", _bindingOptions.FileExtensions);
+        string optionalMessage = _bindingOptions.ListenInSubfolders
+            ? " and all child directories"
+            : string.Empty;
+
+        _logger.Information("The app has started listening for file creation with extensions " +
+           "'{FileExtensions}' in the folder '{FullPath}'{OptionalMessage}.",
+           fileExtensionsString,
+           fullPath,
+           optionalMessage);
+        Console.WriteLine("Press enter to exit.");
+        Console.ReadLine();
     }
 
     /// <summary>
@@ -51,18 +67,6 @@ internal class Program
             watcher.IncludeSubdirectories = _bindingOptions.ListenInSubfolders;
             watcher.EnableRaisingEvents = true;
         }
-
-        var fullPath = string.Equals(_bindingOptions.FolderPath, "./") 
-                ? Directory.GetCurrentDirectory()
-                : _bindingOptions.FolderPath;
-        string fileExtensionsString = string.Join("|", _bindingOptions.FileExtensions);
-
-         _logger.Information("The app has started listening for file creation with extensions " + 
-            "'{FileExtension}' in the folder '{FullPath}' and all child directories.",
-            fileExtensionsString,
-            fullPath);
-        Console.WriteLine("Press enter to exit.");
-        Console.ReadLine();
     }
 
     /// <summary>

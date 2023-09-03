@@ -1,3 +1,5 @@
+
+![data dog status](https://github.com/MTokarev/folder-dog/actions/workflows/main.yml/badge.svg)
 # Overview
 ![super dog](src/FolderDog/static/superdog.png)
 
@@ -79,6 +81,21 @@ Example:
 ## Prerequisites
 - .NET 7 runtime if you don't use the self-contained version
 - The SMTP server must relay emails from the IP where the app runs
+
+## How to run
+You can download the latest release.
+If you have a .NET7 runtime installed, then you can chose `framework-dependent`.
+It has the smaller footprint.
+
+You can also download a precompiled version for your Operation system.
+
+---
+
+After you extract the artifact from the console run it:
+- Framework dependent
+  ![fd](src/FolderDog/static/fd.png)
+- Precompiled
+  ![fi](src/FolderDog/static/fi.png)
 
 ## Feedback
 Please leave [feedback](https://github.com/MTokarev/folder-dog/discussions) to make this small app better ❤️.

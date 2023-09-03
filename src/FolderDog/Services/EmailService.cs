@@ -99,7 +99,7 @@ namespace FolderDog.Services
 
             if (fileStream is not null)
             {
-                mailMessage.Attachments.Add(new Attachment(fileStream, fileStream.Name));
+                mailMessage.Attachments.Add(new Attachment(fileStream, fileName));
             }
             mailMessage.Body = message;
             mailMessage.Subject = _emailOptions.MessageSubject;

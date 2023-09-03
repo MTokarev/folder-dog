@@ -94,17 +94,16 @@ internal class Program
                 _logger.Information("New file creation has been detected: '{FullPath}'", e.FullPath);
                 if (_fileService.TryGetFileStream(e.FullPath, out fs))
                 {
-                    var fileInfo = new FileInfo(e.FullPath);
-                    var result = _messageSender.SendMessage($"File was created '{e.Name}'", fs, fileInfo.Name);
+                    var result = _messageSender.SendMessage($"File was created '{e.Name}'", fs, e.Name);
 
                     if (result.IsSuccessful)
                     {
-                        _logger.Information("File {FileFullName} has been processed", fileInfo.FullName);
+                        _logger.Information("File {FileFullName} has been processed", e.FullPath);
                     }
                     else
                     {
                         _logger.Error("Unable to process '{FileFullName}'. Errors: '{Errors}'.",
-                            fileInfo.FullName,
+                            e.FullPath,
                             string.Join(",", result.Errors));
                     }
                 }

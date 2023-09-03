@@ -86,7 +86,7 @@ namespace FolderDog.Services
                 }
             }
 
-            _logger.Debug("Adding '{FileFullName}' to the cache...", fileInfo.FullName);
+            _logger.Debug("Adding '{FileFullName}' to the cache.", fileInfo.FullName);
             _processedFilesCache[filePath] = new FileCache { FileSize = fileInfo.Length, LastProcessed = DateTime.UtcNow };
 
             return false;

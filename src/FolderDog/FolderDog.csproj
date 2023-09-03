@@ -5,7 +5,6 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <DebugType>None</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <ApplicationIcon>./static/folder-dog.ico</ApplicationIcon>
   </PropertyGroup>

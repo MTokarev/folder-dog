@@ -64,6 +64,8 @@ jobs:
   release:
     needs: build-framework-dependent
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'write'
     steps:
     - name: Download Artifact
       uses: actions/download-artifact@v3

@@ -143,12 +143,25 @@ internal class Program
     /// <returns>Return config</returns>
     private static IConfigurationRoot LoadConfiguration()
     {
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile(ConfigFileName, optional: false);
+        try
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile(ConfigFileName, optional: false);
 
-        var config = builder.Build();
-        return config;
+            var config = builder.Build();
+            return config;
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.WriteLine($"Unable to load 'appsettings.json' file." +
+                "Please make sure you put it in the same location with this app." +
+                $"Error message: '{ex.Message}'.");
+            Console.WriteLine("Please check readme file: 'https://github.com/MTokarev/folder-dog/blob/main/README.MD'");
+        }
+
+        // App failed at this point
+        return null;
     }
 
     /// <summary>

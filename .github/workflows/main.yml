@@ -28,7 +28,7 @@ jobs:
     with:
       release-name: Release ${{ github.run_number }} for Linux
       runtime-name: linux-x64
-      runtime-configuration: --runtime linux-x64
+      runtime-configuration: --runtime linux-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false
       version-tag: ${{ github.run_number }}
 
   rhel-x64:
@@ -37,7 +37,7 @@ jobs:
     with:
       release-name: Release ${{ github.run_number }} for RedHat
       runtime-name: rhel-x64
-      runtime-configuration: --runtime rhel-x64
+      runtime-configuration: --runtime rhel-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false
       version-tag: ${{ github.run_number }}
 
   windows-x64:
@@ -46,5 +46,5 @@ jobs:
     with:
       release-name: Release ${{ github.run_number }} for Windows
       runtime-name: win-x64
-      runtime-configuration: --runtime win-x64
+      runtime-configuration: --runtime win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false
       version-tag: ${{ github.run_number }}

@@ -18,10 +18,17 @@
 		public int WaitUntilNextRetryInMilliseconds { get; set; }
 
 		/// <summary>
-		/// Optional: If true - process the same file more than once if we get more than one file creation event
-		/// By default it set to false. That means if the app has proccessed the file with the same name and size
-		/// then program will log event and ignore.
+		/// Optional: The wait time in milliseconds before app will try to access file
+		/// Default: 0
+		/// <seealso cref="RepeatAccessAttempts"/>
 		/// </summary>
-		public bool SkipProcessedFiles { get; set; } = false;
+		public int WaitBeforeExecutionInMilliseconds { get; set; } = 0;
+
+        /// <summary>
+        /// Optional: If true - process the same file more than once if we get more than one file creation event
+        /// By default it set to false. That means if the app has proccessed the file with the same name and size
+        /// then program will log event and ignore.
+        /// </summary>
+        public bool SkipProcessedFiles { get; set; } = false;
 	}
 }

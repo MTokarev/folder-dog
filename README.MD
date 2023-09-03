@@ -43,6 +43,7 @@ Example:
   "FileService": {
     "RepeatAccessAttempts": 3,
     "WaitUntilNextRetryInMilliseconds": 1000,
+    "WaitBeforeExecutionInMilliseconds": 1000,
     "SkipProcessedFiles": true
   },
 

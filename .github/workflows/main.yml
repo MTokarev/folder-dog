@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - src/**
+permissions:
+  contents: write
 
 # TODO: Currently all jobs will create a different releases with the same name
 # For Example:

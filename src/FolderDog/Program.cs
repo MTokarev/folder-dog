@@ -145,7 +145,7 @@ internal class Program
     {
         var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile(ConfigFileName, optional: false, reloadOnChange: true);
+            .AddJsonFile(ConfigFileName, optional: false);
 
         var config = builder.Build();
         return config;

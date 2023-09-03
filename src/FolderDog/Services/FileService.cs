@@ -45,6 +45,7 @@ namespace FolderDog.Services
                 _logger.Information("Waiting '{Milliseconds}' miliseconds to allow external application to flush the memory for the '{FilePath}' to a disk",
                     _fileOptions.WaitBeforeExecutionInMilliseconds,
                     filePath);
+                Thread.Sleep(_fileOptions.WaitBeforeExecutionInMilliseconds);
             }
 
             // Trying access the file multiple time. To give opportunity to the external app to flush the data to the disk

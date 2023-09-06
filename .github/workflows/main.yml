@@ -65,7 +65,7 @@ jobs:
           fi
           echo "Files to zip:"
           ls /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/$folder
-          tar -C /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/$folder -cvzf $ARTIFACT_FILE_NAME .
+          tar -C /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/$folder -cvzf artifact-${{ matrix.runtime }}.zip .
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:

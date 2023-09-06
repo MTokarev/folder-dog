@@ -1,6 +1,12 @@
 name: .NET
 
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      project-folder:
+        required: false
+        default: src/FolderDog
+        type: string
 
 permissions:
   contents: write
@@ -13,6 +19,9 @@ permissions:
 jobs:
   setup-matrix:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.project-folder }}
     strategy:
       matrix:
         runtime: [

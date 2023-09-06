@@ -31,10 +31,9 @@ internal class Program
         _fileService = new FileService(_fileServiceOptions, _logger);
         ConfigureFileListener();
 
-
         var fullPath = string.Equals(_bindingOptions.FolderPath, "./")
-        ? Directory.GetCurrentDirectory()
-        : _bindingOptions.FolderPath;
+            ? Directory.GetCurrentDirectory()
+            : _bindingOptions.FolderPath;
         string fileExtensionsString = string.Join("|", _bindingOptions.FileExtensions);
         string optionalMessage = _bindingOptions.ListenInSubfolders
             ? " and all child directories"

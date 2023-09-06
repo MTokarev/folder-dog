@@ -30,7 +30,7 @@ namespace FolderDog.Services
             // Adding delay could solve this case
             if (_fileOptions.WaitBeforeExecutionInMilliseconds > 0)
             {
-                _logger.Information("Waiting '{Milliseconds}' miliseconds to allow external application to flush the memory for the '{FilePath}' to a disk",
+                _logger.Information("Waiting '{Milliseconds}' milliseconds to allow external application to flush the memory for the '{FilePath}' to a disk",
                     _fileOptions.WaitBeforeExecutionInMilliseconds,
                     filePath);
                 Thread.Sleep(_fileOptions.WaitBeforeExecutionInMilliseconds);
@@ -42,12 +42,11 @@ namespace FolderDog.Services
                 _logger.Debug("Option '{OptionName}' is enabled. Checking if file '{FilePath}' was processed before.",
                     nameof(_fileOptions.SkipProcessedFiles),
                     filePath);
-                if(HasFileBeenProcessed(filePath))
+                if(HasFileBeenRead(filePath))
                 {
                     return false;
                 }
             }
-
 
             // Trying access the file multiple time. To give opportunity to the external app to flush the data to the disk
             for (int i = 1; i <= _fileOptions.RepeatAccessAttempts; i++)
@@ -79,12 +78,12 @@ namespace FolderDog.Services
         }
 
         /// <summary>
-        /// Check if file has been processed.
-        /// This function will use the file name and the size.
+        /// Check if file has been read before
+        /// This function will use the file name and the size to calculate
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>True if file (compared by file name and size) has been already processed. Otherwise False.</returns>
-        private bool HasFileBeenProcessed(string filePath)
+        private bool HasFileBeenRead(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
             if (_processedFilesCache.TryGetValue(filePath, out FileCache fileCache))

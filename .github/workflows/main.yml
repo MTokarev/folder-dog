@@ -17,7 +17,7 @@ permissions:
 # 2. Release 5 (for windows x64)
 # This needs to be fixed. Only one release should be created at the pipeline run, and that release should include all artifacts (windows, linux, etc)
 jobs:
-  setup-matrix:
+  build-and-release:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,15 +34,19 @@ jobs:
           - runtime: sdk-required
             release-name: Release ${{ github.run_number }} (Required .net7.0 runtime)
             runtime-configuration: ''
+            asset-name: folder-dog-framework-dependent-${{ github.run_number }}.zip
           - runtime: linux-x64
             release-name: Release ${{ github.run_number }} for Linux
             runtime-configuration: '--runtime linux-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
+            asset-name: folder-dog-linux-x64-${{ github.run_number }}.zip
           - runtime: rhel-x64
             release-name: Release ${{ github.run_number }} for RedHat
             runtime-configuration: '--runtime rhel-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
+            asset-name: folder-dog-rhel-x64-${{ github.run_number }}.zip
           - runtime: win-x64
             release-name: Release ${{ github.run_number }} for Windows
             runtime-configuration: '--runtime win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
+            asset-name: folder-dog-windows-x64-${{ github.run_number }}.zip
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -65,51 +69,22 @@ jobs:
           fi
           echo "Files to zip:"
           ls /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/$folder
-          tar -C /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/$folder -cvzf artifact-${{ matrix.runtime }}.zip .
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
+          tar -C /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/$folder -cvzf ${{ matrix.asset-name }} .
+
+      - name: Create a release
+        id: new-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: artifact-${{ matrix.runtime }}
-          path: artifact-${{ matrix.runtime }}.zip
-   
-  # build-and-deploy:
-  #   name: Build and Release Framework-Dependent Package
-  #   uses: ./.github/workflows/dotnet.yml
-  #   with:
-  #     release-name: ${{ matrix.release-name }}
-  #     runtime-configuration: ${{ matrix.release-configuration }}
-  #     version-tag: ${{ github.run_number }}
-  
-  # framework-specific:
-    # name: Build and Release Framework-Dependent Package
-    # uses: ./.github/workflows/dotnet.yml
-    # with:
-    #   release-name: Release ${{ github.run_number }} (Required .net7.0 runtime)
-    #   version-tag: ${{ github.run_number }}
-
-  # linux-x64:
-  #   name: Build and Release for linux x64
-  #   uses: ./.github/workflows/dotnet.yml
-  #   with:
-  #     release-name: Release ${{ github.run_number }} for Linux
-  #     runtime-name: linux-x64
-  #     runtime-configuration: --runtime linux-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none
-  #     version-tag: ${{ github.run_number }}
-
-  # rhel-x64:
-  #   name: Build and Release for RHEL x64
-  #   uses: ./.github/workflows/dotnet.yml
-  #   with:
-  #     release-name: Release ${{ github.run_number }} for RedHat
-  #     runtime-name: rhel-x64
-  #     runtime-configuration: --runtime rhel-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none
-  #     version-tag: ${{ github.run_number }}
-
-  # windows-x64:
-  #   name: Build and Release for Windows x64
-  #   uses: ./.github/workflows/dotnet.yml
-  #   with:
-  #     release-name: Release ${{ github.run_number }} for Windows
-  #     runtime-name: win-x64
-  #     runtime-configuration: --runtime win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none
-  #     version-tag: ${{ github.run_number }}
+          tag_name: ${{ matrix.runtime }}-${{ github.run_number }}
+          release_name: ${{ matrix.release-name }}
+      - name: Upload Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.new-release.outputs.upload_url }}
+          asset_path: artifact-${{ matrix.runtime }}.zip .
+          asset_name: ${{ matrix.asset-name }}
+          asset_content_type: application/zip

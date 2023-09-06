@@ -1,11 +1,7 @@
 name: .NET
 
-on:
-  push:
-    branches: 
-      - main
-    paths:
-      - src/**
+on: workflow_dispatch
+
 permissions:
   contents: write
 
@@ -15,36 +11,68 @@ permissions:
 # 2. Release 5 (for windows x64)
 # This needs to be fixed. Only one release should be created at the pipeline run, and that release should include all artifacts (windows, linux, etc)
 jobs:
-  framework-specific:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runtime: [
+          sdk-required,
+          linux-x64,
+          rhel-x64,
+          windows-x64
+        ]
+        include:
+          - runtime: sdk-required
+            release-name: Release ${{ github.run_number }} (Required .net7.0 runtime)
+            runtime-configuration: ''
+          - runtime: linux-x64
+            release-name: Release ${{ github.run_number }} for Linux
+            runtime-configuration: '--runtime linux-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
+          - runtime: rhel-x64
+            release-name: Release ${{ github.run_number }} for RedHat
+            runtime-configuration: '--runtime rhel-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
+          - runtime: windows-x64
+            release-name: Release ${{ github.run_number }} for Windows
+            runtime-configuration: '--runtime win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
+   
+  build-and-deploy:
     name: Build and Release Framework-Dependent Package
     uses: ./.github/workflows/dotnet.yml
     with:
-      release-name: Release ${{ github.run_number }} (Required .net7.0 runtime)
+      release-name: ${{ matrix.release-name }}
+      runtime-configuration: ${{ matrix.release-configuration }}
       version-tag: ${{ github.run_number }}
+  
+  # framework-specific:
+    # name: Build and Release Framework-Dependent Package
+    # uses: ./.github/workflows/dotnet.yml
+    # with:
+    #   release-name: Release ${{ github.run_number }} (Required .net7.0 runtime)
+    #   version-tag: ${{ github.run_number }}
 
-  linux-x64:
-    name: Build and Release for linux x64
-    uses: ./.github/workflows/dotnet.yml
-    with:
-      release-name: Release ${{ github.run_number }} for Linux
-      runtime-name: linux-x64
-      runtime-configuration: --runtime linux-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none
-      version-tag: ${{ github.run_number }}
+  # linux-x64:
+  #   name: Build and Release for linux x64
+  #   uses: ./.github/workflows/dotnet.yml
+  #   with:
+  #     release-name: Release ${{ github.run_number }} for Linux
+  #     runtime-name: linux-x64
+  #     runtime-configuration: --runtime linux-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none
+  #     version-tag: ${{ github.run_number }}
 
-  rhel-x64:
-    name: Build and Release for RHEL x64
-    uses: ./.github/workflows/dotnet.yml
-    with:
-      release-name: Release ${{ github.run_number }} for RedHat
-      runtime-name: rhel-x64
-      runtime-configuration: --runtime rhel-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none
-      version-tag: ${{ github.run_number }}
+  # rhel-x64:
+  #   name: Build and Release for RHEL x64
+  #   uses: ./.github/workflows/dotnet.yml
+  #   with:
+  #     release-name: Release ${{ github.run_number }} for RedHat
+  #     runtime-name: rhel-x64
+  #     runtime-configuration: --runtime rhel-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none
+  #     version-tag: ${{ github.run_number }}
 
-  windows-x64:
-    name: Build and Release for Windows x64
-    uses: ./.github/workflows/dotnet.yml
-    with:
-      release-name: Release ${{ github.run_number }} for Windows
-      runtime-name: win-x64
-      runtime-configuration: --runtime win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none
-      version-tag: ${{ github.run_number }}
+  # windows-x64:
+  #   name: Build and Release for Windows x64
+  #   uses: ./.github/workflows/dotnet.yml
+  #   with:
+  #     release-name: Release ${{ github.run_number }} for Windows
+  #     runtime-name: win-x64
+  #     runtime-configuration: --runtime win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none
+  #     version-tag: ${{ github.run_number }}

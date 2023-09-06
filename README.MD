@@ -52,12 +52,13 @@ Example:
     "SendTos": [
       "user@mail.com"
     ],
-    "SmtpServerIpv4Address": "<PutYourIpv4SmtpServerAddressHere>",
+    "SmtpServerHost": "<PutYourSmtpServerIpOrHostName>",
     "SmtpServerPortNumber": 25,
     "MessageSubject": "File has been created"
   },
   "Serilog": {
     "MinimumLevel": "Information",
+    "Using":  [ "Serilog.Sinks.Console", "Serilog.Sinks.File" ],
     "WriteTo": [
       {
         "Name": "File",

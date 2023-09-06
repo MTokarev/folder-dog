@@ -27,7 +27,7 @@ namespace FolderDog.Services
             var result = new Result();
             using var mailMessage = new MailMessage();
             using var smtpClient = new SmtpClient(
-                _emailOptions.SmtpServerIpv4Address,
+                _emailOptions.SmtpServerHost,
                 _emailOptions.SmtpServerPortNumber);
             
             try
@@ -68,20 +68,19 @@ namespace FolderDog.Services
         }
 
         /// <summary>
-        /// Generate message
+        /// Builds a message
         /// </summary>
-        /// <param name="mailMessage">Mail Message to build</param>
+        /// <param name="mailMessage">Message object to build</param>
         /// <param name="message">Message body</param>
-        /// <param name="pathToAttachment"></param>
+        /// <param name="fileStream">Attachment file stream</param>
+        /// <param name="fileName">File name</param>
         /// <returns><see cref="MailMessage"/>attachment</returns>
         private MailMessage MessageBuilder(
             MailMessage mailMessage,
             string message,
-            FileStream fileStream = null,
-            string fileName = null)
+            FileStream fileStream,
+            string fileName)
         {
-            mailMessage.From = new MailAddress(_emailOptions.SendFrom);
-            
             foreach (var sendTo in _emailOptions.SendTos)
             {
                 mailMessage.To.Add(new MailAddress(sendTo));
@@ -97,10 +96,8 @@ namespace FolderDog.Services
                 mailMessage.CC.Add(new MailAddress(sendCc));
             }
 
-            if (fileStream is not null)
-            {
-                mailMessage.Attachments.Add(new Attachment(fileStream, fileName));
-            }
+            mailMessage.From = new MailAddress(_emailOptions.SendFrom);
+            mailMessage.Attachments.Add(new Attachment(fileStream, fileName));
             mailMessage.Body = message;
             mailMessage.Subject = _emailOptions.MessageSubject;
 

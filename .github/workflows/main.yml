@@ -85,6 +85,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.new-release.outputs.upload_url }}
-          asset_path: artifact-${{ matrix.runtime }}.zip .
           asset_name: ${{ matrix.asset-name }}
           asset_content_type: application/zip

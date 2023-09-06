@@ -37,14 +37,39 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: |
+          dotnet build --no-restore
+          dotnet publish -c Release ${{ matrix.runtime-configuration }}
+      - name: Zip Artifact
+        run: |
+          if [ "${{ matrix.runtime }}" = "sdk-required" ]; then
+              folder="publish"
+          else
+              folder="${{ matrix.runtime }}/publish"
+          fi
+          echo "Files to zip:"
+          ls /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/$folder
+          tar -C /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/$folder -cvzf $ARTIFACT_FILE_NAME .
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifact-${{ matrix.runtime }}
+          path: artifact-${{ matrix.runtime }}.zip
    
-  build-and-deploy:
-    name: Build and Release Framework-Dependent Package
-    uses: ./.github/workflows/dotnet.yml
-    with:
-      release-name: ${{ matrix.release-name }}
-      runtime-configuration: ${{ matrix.release-configuration }}
-      version-tag: ${{ github.run_number }}
+  # build-and-deploy:
+  #   name: Build and Release Framework-Dependent Package
+  #   uses: ./.github/workflows/dotnet.yml
+  #   with:
+  #     release-name: ${{ matrix.release-name }}
+  #     runtime-configuration: ${{ matrix.release-configuration }}
+  #     version-tag: ${{ github.run_number }}
   
   # framework-specific:
     # name: Build and Release Framework-Dependent Package

@@ -34,6 +34,9 @@ jobs:
           - runtime: windows-x64
             release-name: Release ${{ github.run_number }} for Windows
             runtime-configuration: '--runtime win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
    
   build-and-deploy:
     name: Build and Release Framework-Dependent Package

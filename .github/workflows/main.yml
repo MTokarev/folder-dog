@@ -1,4 +1,4 @@
-name: .NET
+name: Build and Release
 
 on: 
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
           sdk-required,
           linux-x64,
           rhel-x64,
-          windows-x64
+          win-x64
         ]
         include:
           - runtime: sdk-required
@@ -40,7 +40,7 @@ jobs:
           - runtime: rhel-x64
             release-name: Release ${{ github.run_number }} for RedHat
             runtime-configuration: '--runtime rhel-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
-          - runtime: windows-x64
+          - runtime: win-x64
             release-name: Release ${{ github.run_number }} for Windows
             runtime-configuration: '--runtime win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
     steps:

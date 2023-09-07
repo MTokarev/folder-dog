@@ -85,6 +85,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.new-release.outputs.upload_url }}
-          asset_path: ${{ matrix.asset-name }}
+          asset_path: ${{ inputs.project-folder}}/${{ matrix.asset-name }}
           asset_name: ${{ matrix.asset-name }}
           asset_content_type: application/zip

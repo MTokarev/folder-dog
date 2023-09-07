@@ -68,7 +68,6 @@ jobs:
       - name: Aggregate Releases
         run: |
           # Gather all zip files
-          zip_file = aggregated-assets.zip
           echo "'$(pwd)' folder content: \n$(ls)"
 
           # Zip the aggregated assets

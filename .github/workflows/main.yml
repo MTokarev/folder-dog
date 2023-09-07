@@ -11,18 +11,9 @@ on:
 permissions:
   contents: write
 
-# TODO: Currently all jobs will create a different releases with the same name
-# For Example:
-# 1. Release 5 (for linux x64)
-# 2. Release 5 (for windows x64)
-# This needs to be fixed. Only one release should be created at the pipeline run, and that release should include all artifacts (windows, linux, etc)
-
-
 jobs:
-  build-and-release:
+  build:
     runs-on: ubuntu-latest
-    env:
-      PUBLISH_BASE_DIR: /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/
     defaults:
       run:
         working-directory: ${{ inputs.project-folder }}
@@ -36,25 +27,17 @@ jobs:
         ]
         include:
           - runtime: sdk-required
-            release-name: Release ${{ github.run_number }} (Required .net7.0 runtime)
             runtime-configuration: ''
-            publish-dir: /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/publish
-            asset-name: folder-dog-framework-dependent-${{ github.run_number }}.zip
+            publish-dir: publish
           - runtime: linux-x64
-            release-name: Release ${{ github.run_number }} for Linux
             runtime-configuration: '--runtime linux-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
-            asset-name: folder-dog-linux-x64-${{ github.run_number }}.zip
-            publish-dir: /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/linux-x64/publish
+            publish-dir: linux-x64/publish
           - runtime: rhel-x64
-            release-name: Release ${{ github.run_number }} for RedHat
             runtime-configuration: '--runtime rhel-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
-            asset-name: folder-dog-rhel-x64-${{ github.run_number }}.zip
-            publish-dir: /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/rhel-x64/publish
+            publish-dir: /rhel-x64/publish
           - runtime: win-x64
-            release-name: Release ${{ github.run_number }} for Windows
             runtime-configuration: '--runtime win-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=false /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=false /p:DebugType=none'
-            asset-name: folder-dog-windows-x64-${{ github.run_number }}.zip
-            publish-dir: /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/win-x64/publish
+            publish-dir: win-x64/publish
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -68,26 +51,15 @@ jobs:
         run: |
           dotnet build --no-restore
           dotnet publish -c Release ${{ matrix.runtime-configuration }}
-      # - name: Zip Artifact
-      #   run: |
-      #     if [ "${{ matrix.runtime }}" = "sdk-required" ]; then
-      #         folder="publish"
-      #     else
-      #         folder="${{ matrix.runtime }}/publish"
-      #     fi
-      #     echo "Files to zip:"
-      #     ls /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/$folder
-      #     tar -C /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/$folder -cvzf ${{ matrix.asset-name }} .
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.asset-name }}
-          path: ${{ matrix.publish-dir }}
+          name: folder-dog-${{ matrix.runtime }}
+          path: /home/runner/work/folder-dog/folder-dog/src/FolderDog/bin/Release/net7.0/${{ matrix.publish-dir }}
 
-
-  aggregate-releases:
+  releases:
     runs-on: ubuntu-latest
-    needs: build-and-release
+    needs: build
     steps:
       - name: Download Artifact
         uses: actions/download-artifact@v3
@@ -128,26 +100,4 @@ jobs:
           upload_url: ${{ steps.new-release.outputs.upload_url }}
           asset_path: ./aggregated-assets.zip
           asset_name: all-runtimes.zip
-          asset_content_type: application/zip      
-      
-      
-      
-      
-      
-      #     - name: Create a release
-      #   id: new-release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: ${{ matrix.runtime }}-${{ github.run_number }}
-      #     release_name: ${{ matrix.release-name }}
-      # - name: Upload Release
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.new-release.outputs.upload_url }}
-      #     asset_path: ${{ inputs.project-folder}}/${{ matrix.asset-name }}
-      #     asset_name: ${{ matrix.asset-name }}
-      #     asset_content_type: application/zip
+          asset_content_type: application/zip

@@ -63,17 +63,18 @@ jobs:
     steps:
       - name: Download Artifact
         uses: actions/download-artifact@v3
+        with:
+          path: all-artifacts
       - name: Aggregate Releases
         run: |
           # Gather all zip files
-          echo "'$(pwd)' folder content:"
-          ls .
+          zip_file = aggregated-assets.zip
+          echo "'$(pwd)' folder content: \n$(ls)"
 
           # Zip the aggregated assets
-          tar -czvf aggregated-assets.zip .
+          tar -czvf aggregated-assets.zip ./all-artifacts
 
-          echo "'$(pwd)' folder content after zip:"
-          ls .
+          echo "'$(pwd)' folder content after zip: \n$(ls)"
       - name: Create a release
         id: new-release
         uses: actions/create-release@v1

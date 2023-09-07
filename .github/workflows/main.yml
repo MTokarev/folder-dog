@@ -86,6 +86,9 @@ jobs:
       - name: Aggregate Releases
         run: |
           # Gather all zip files
+          echo "'$(pwd)' folder content:"
+          ls .
+
           zip_files=$(find . -name "*.zip")
 
           # Create a directory to store the aggregated assets
@@ -93,11 +96,14 @@ jobs:
 
           # Copy all zip files to the aggregated-assets directory
           for zip_file in $zip_files; do
-            cp $zip_file aggregated-assets/
+            cp -r $zip_file aggregated-assets/
           done
 
           # Zip the aggregated assets
           tar -czvf aggregated-assets.zip aggregated-assets/
+
+          echo "'$(pwd)' folder content:"
+          ls .
 
       - name: Create a release
         id: new-release

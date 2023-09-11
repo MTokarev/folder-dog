@@ -3,15 +3,61 @@
 # Overview
 ![super dog](src/FolderDog/static/superdog.png)
 
-Do you need to listen for file creation events and send files as attachments via Email? Folder Dog is ready to help.
+Do you need to listen and react for file creation events? Folder Dog is ready to help.
+Currently you can send email, webhook or do both.
 
-If you like this app, please give it a star ⭐️
+If you will like this app, please give it a star ⭐️
 
 ## How it works
 It binds to OS file events and subscribes specifically to file creation events.
 
 ## How the app notifies
 It uses an SMTP server. You need to open a relay from the IP where this app is running. You can provide the message subject, send from address, and recipient information such as `SendTos`, `SendCcs`, and `SendBccs`.
+
+## How webhook works
+This is a nice to have feature for your virtual machine or any other onprem server type where you need to bind and execute something on the file creation event (similar functionality is available out of the box for some cloud resources, such as Azure Storage Account).
+
+Moreover, if you are seeking the tool that can listen webhooks and execute scripts, feel free to check this [out](https://github.com/MTokarev/webhookshell).
+
+Here is configuration example:
+```json
+"Webhook": {
+  "Url": "http://localhost:58427/webhook/v1",
+  "Method": "POST",
+  "Body": {
+    "Key": "<YourSecretKey>",
+    "Script": "Test-Script.ps1",
+    "Param": "-Param1 \"{{fileName}}\" -Param2 \"{{fileFullPath}}\""
+  }
+}
+```
+
+`URL` - WebHook server address
+`Method` - Can be `POST` or `GET`
+`Body` - It is essential a dictionary. You can provide your value here. The one thing to remember - `{{fileName}}` and `{{fileFullPath}}` masks will be replaced with the values from the file event. Also, despite you can provide a number or the datetime as a value everything will be converted to a string. 
+
+
+Another configuration example:
+```json
+"Webhook": {
+  "Url": "http://localhost:58427/webhook/v1",
+  "Method": "POST",
+  "Body": {
+    "MyAwesomeParam": "OmgItIsAWebhook",
+    "NotThatAwesome": "ButStill",
+    "ThisWillBeConvertedToAString": 1
+  }
+}
+```
+
+And one more with get:
+```json
+"Webhook": {
+  "Url": "http://azure-function.azure.com/myAwesomeFunc",
+  "Method": "GET"
+}
+```
+Currently, you cannot pass the values from the file event using `GET` method. It can be easily integrated. If you need it, then welcome to a discussion section on this github page.
 
 ## How do I know that the app is working
 Once you run the app, it will log messages to both the console and to the file log. By default, it creates a `log` directory in the current folder and every day creates a log file. The log files are rotated for 31 days by default.

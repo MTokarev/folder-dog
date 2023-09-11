@@ -17,7 +17,7 @@ It uses an SMTP server. You need to open a relay from the IP where this app is r
 ## How webhook works
 This is a nice to have feature for your virtual machine or any other onprem server type where you need to bind and execute something on the file creation event (similar functionality is available out of the box for some cloud resources, such as Azure Storage Account).
 
-Moreover, if you are seeking the tool that can listen webhooks and execute scripts, feel free to check this [out](https://github.com/MTokarev/webhookshell).
+Moreover, if you are seeking a tool that can listen to webhooks and execute scripts, feel free to check this [out](https://github.com/MTokarev/webhookshell).
 
 Here is configuration example:
 ```json
@@ -33,7 +33,9 @@ Here is configuration example:
 ```
 
 `URL` - WebHook server address
+
 `Method` - Can be `POST` or `GET`
+
 `Body` - It is essential a dictionary. You can provide your value here. The one thing to remember - `{{fileName}}` and `{{fileFullPath}}` masks will be replaced with the values from the file event. Also, despite you can provide a number or the datetime as a value everything will be converted to a string. 
 
 

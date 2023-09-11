@@ -1,4 +1,6 @@
-﻿using FolderDog.Interfaces;
+﻿using System.Net;
+using FolderDog.Interfaces;
+using FolderDog.Models;
 using FolderDog.Options;
 using FolderDog.Services;
 using Microsoft.Extensions.Configuration;
@@ -10,7 +12,9 @@ internal class Program
     private const string ConfigFileName = "appsettings.json";
     private static readonly BindingOptions _bindingOptions = new();
     private static readonly EmailOptions _emailOptions = new();
+    private static readonly WebhookOptions _webhookOptions = new();
     private static readonly FileServiceOptions _fileServiceOptions = new();
+    private static WebhookService _webhookService;
     private static IFileService _fileService;
     private static IMessageSender _messageSender;
     private static ILogger _logger;
@@ -29,6 +33,7 @@ internal class Program
         BindOptions();
         _messageSender = new EmailService(_emailOptions, _logger);
         _fileService = new FileService(_fileServiceOptions, _logger);
+        _webhookService = new WebhookService(_webhookOptions, _logger);
         ConfigureFileListener();
 
         var fullPath = string.Equals(_bindingOptions.FolderPath, "./")
@@ -61,15 +66,27 @@ internal class Program
                 | NotifyFilters.FileName
                 | NotifyFilters.Size;
 
-            watcher.Created += OnCreatedAsync;
             watcher.Filter = $"*.{fileExtension}";
             watcher.IncludeSubdirectories = _bindingOptions.ListenInSubfolders;
             watcher.EnableRaisingEvents = true;
+            
+            // Registering handlers
+            if (!string.IsNullOrEmpty(_webhookOptions.Url))
+            {
+                watcher.Created += async (object sender, FileSystemEventArgs e) 
+                    => await _webhookService.SendHookAsync(e);
+            }
+
+            if (!string.IsNullOrEmpty(_emailOptions.SmtpServerHost))
+            {
+                watcher.Created += OnCreatedMailSendAsync;
+            }
+                
         }
     }
 
     /// <summary>
-    /// OnFile creation async handler
+    /// OnFile creation async handler for mail sending
     /// </summary>
     /// <remarks>
     /// Overall it is a bad practice to use 'async void' except for event handlers.
@@ -77,7 +94,7 @@ internal class Program
     /// </remarks>
     /// <param name="sender">Event sender</param>
     /// <param name="e">File event</param>
-    private static async void OnCreatedAsync(object sender, FileSystemEventArgs e)
+    private static async void OnCreatedMailSendAsync(object sender, FileSystemEventArgs e)
     {
         // Run handler in the thread pool
         // File service has a conflict resolution logic that locks the thread before retry
@@ -135,6 +152,8 @@ internal class Program
             .Bind(_emailOptions);
         _config.GetSection("FileService")
             .Bind(_fileServiceOptions);
+        _config.GetSection("Webhook")
+            .Bind(_webhookOptions);
     }
 
     /// <summary>

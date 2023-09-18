@@ -1,6 +1,4 @@
-﻿using System.Net;
-using FolderDog.Interfaces;
-using FolderDog.Models;
+﻿using FolderDog.Interfaces;
 using FolderDog.Options;
 using FolderDog.Services;
 using Microsoft.Extensions.Configuration;
@@ -65,7 +63,8 @@ internal class Program
                 | NotifyFilters.DirectoryName
                 | NotifyFilters.FileName
                 | NotifyFilters.Size;
-
+            
+            watcher.Error += OnError;
             watcher.Filter = $"*.{fileExtension}";
             watcher.IncludeSubdirectories = _bindingOptions.ListenInSubfolders;
             watcher.EnableRaisingEvents = true;
@@ -139,6 +138,18 @@ internal class Program
                 }
             }
         });
+    }
+
+    /// <summary>
+    /// File watcher error handler
+    /// </summary>
+    /// <param name="sender">Event sender</param>
+    /// <param name="e">Error</param>
+    private static void OnError(object sender, ErrorEventArgs e)
+    {
+        var exception = e.GetException();
+        _logger.Warning("Error occurred in file processing. '{Exception}' message '{ExceptionMessage}'",
+            exception, exception.Message);
     }
 
     /// <summary>

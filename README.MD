@@ -36,7 +36,7 @@ Here is configuration example:
 
 `Method` - Can be `POST` or `GET`
 
-`Body` - It is essential a dictionary. You can provide your value here. The one thing to remember - `{{fileName}}` and `{{fileFullPath}}` masks will be replaced with the values from the file event. Also, despite you can provide a number or the datetime as a value everything will be converted to a string. 
+`Body` - It is essential a dictionary. You can provide your values here. The one thing to remember - `{{fileName}}` and `{{fileFullPath}}` masks will be replaced with the values from the file event. Also, despite you can provide a number or the datetime as a value everything will be converted to a string. 
 
 
 Another configuration example:
@@ -67,7 +67,7 @@ Once you run the app, it will log messages to both the console and to the file l
 ## Handle edge cases
 You can control how to handle edge cases such as:
 - A file is still open by another process (Some apps might write content by batches).
-- We had already processed the file before, but now received the same event. You can control what to do in this case.
+- We had already processed the file before, but now received the same event. You can control what to do in this case. By default if we have received an event about the file that was processed before and the size for this file is the same, then the app will skip further processing and log the message.
 
 Also, you can provide one or many file extensions to listen to. For example, only excel or csv files.
 
@@ -94,7 +94,15 @@ Example:
     "WaitBeforeExecutionInMilliseconds": 1000,
     "SkipProcessedFiles": true
   },
-
+  "Webhook": {
+    "Url": "http://localhost:58427/webhook/v1",
+    "Method": "POST",
+    "Body": {
+      "Key": "<YourSecretKey>",
+      "Script": "Test-Script.ps1",
+      "Param": "-Param1 \"{{fileName}}\" -Param2 \"{{fileFullPath}}\""
+    }
+  },
   "Email": {
     "SendFrom": "no-reply@mail.com",
     "SendTos": [
@@ -123,10 +131,11 @@ Example:
   }
 }
 ```
-- Bindings - provide folder path where to listen as well as file extensions.
-- FileService - configuration for the file service to control how to handle edge cases.
-- Email - Mail configuration
-- Serilog - Logging configuration
+- Bindings - Provide folder path where to listen as well as file extensions.
+- FileService - Configuration for the file service to control how to handle edge cases.
+- Email - Mail configuration. Beside params in the config example you can add array of `SendCcs` and `SendBccs`
+- Serilog - Logging configuration. By default it will create a `logs` folder in the working directory. Every day a log file will be created. Rotation is enabled and set to 31 days. 
+- Webhook - Define hook configuration. URL and Method are required properties here. `Method` can be either `POST` or `GET`. Specify `Body` dictionary in case you set `Method` to `POST`.
 
 ## Prerequisites
 - .NET 7 runtime if you don't use the self-contained version

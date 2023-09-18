@@ -32,7 +32,8 @@ internal class Program
         _messageSender = new EmailService(_emailOptions, _logger);
         _fileService = new FileService(_fileServiceOptions, _logger);
         _webhookService = new WebhookService(_webhookOptions, _logger);
-        ConfigureFileListener();
+        var watcher = new FileSystemWatcher(_bindingOptions.FolderPath);
+        ConfigureFileListener(watcher);
 
         var fullPath = string.Equals(_bindingOptions.FolderPath, "./")
             ? Directory.GetCurrentDirectory()
@@ -54,22 +55,21 @@ internal class Program
     /// <summary>
     /// Set file listeners
     /// </summary>
-    private static void ConfigureFileListener()
+    private static void ConfigureFileListener(FileSystemWatcher watcher)
     {
         foreach(string fileExtension in _bindingOptions.FileExtensions)
         {
-            var watcher = new FileSystemWatcher(_bindingOptions.FolderPath);
             watcher.NotifyFilter = NotifyFilters.Attributes
                 | NotifyFilters.DirectoryName
                 | NotifyFilters.FileName
                 | NotifyFilters.Size;
             
-            watcher.Error += OnError;
             watcher.Filter = $"*.{fileExtension}";
             watcher.IncludeSubdirectories = _bindingOptions.ListenInSubfolders;
             watcher.EnableRaisingEvents = true;
             
             // Registering handlers
+            watcher.Error += OnError;
             if (!string.IsNullOrEmpty(_webhookOptions.Url))
             {
                 watcher.Created += async (object sender, FileSystemEventArgs e) 
@@ -79,8 +79,7 @@ internal class Program
             if (!string.IsNullOrEmpty(_emailOptions.SmtpServerHost))
             {
                 watcher.Created += OnCreatedMailSendAsync;
-            }
-                
+            }          
         }
     }
 
